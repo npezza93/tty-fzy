@@ -25,7 +25,9 @@ module TTY
 
       def test_push_in_different_spot
         search.query = %w(a b c d e)
-        search.position = 3
+        search.right
+        search.right
+        assert_equal 2, search.position
 
         search.push("f")
 
@@ -34,7 +36,7 @@ module TTY
 
       def test_delete
         search.query = %w(a)
-        search.position = 1
+        search.left
         search.delete
 
         assert_empty search.query
@@ -42,7 +44,8 @@ module TTY
 
       def test_delete_in_different_spot
         search.query = %w(a b c d e)
-        search.position = 3
+        search.right
+        search.right
 
         search.delete
 
@@ -51,6 +54,7 @@ module TTY
 
       def test_backspace
         search.query = %w(a)
+        search.right
         search.backspace
 
         assert_empty search.query
@@ -58,7 +62,8 @@ module TTY
 
       def test_backspace_in_different_spot
         search.query = %w(a b c d e)
-        search.position = 3
+        search.right
+        search.right
 
         search.backspace
 
@@ -89,44 +94,45 @@ module TTY
         assert_equal %w(a b), search.query
       end
 
-      def test_forward_when_empty
-        search.forward
+      def test_right_when_empty
+        search.right
 
         assert_equal 0, search.position
       end
 
-      def test_forward
+      def test_right
         choice = Struct.new(:text)
         search.autocomplete(choice.new("ab"))
-        search.position = 1
 
-        search.forward
+        search.left
+        assert_equal 1, search.position
 
-        assert_equal 0, search.position
-      end
-
-      def test_back_when_empty
-        search.back
-
-        assert_equal 0, search.position
-      end
-
-      def test_back
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("ab"))
-        search.position = 1
-
-        search.back
-
+        search.right
         assert_equal 2, search.position
+      end
+
+      def test_left_when_empty
+        search.left
+
+        assert_equal 0, search.position
+      end
+
+      def test_left
+        choice = Struct.new(:text)
+        search.autocomplete(choice.new("ab"))
+
+        search.left
+        assert_equal 1, search.position
       end
 
       def test_render
         choice = Struct.new(:text)
         search.autocomplete(choice.new("a"))
-        search.render
 
-        assert_equal "❯ a", TTY::Fzy.config.output.stream
+        assert_equal(
+          "#{TTY::Cursor.clear_line}❯ a#{TTY::Cursor.column(4)}",
+          TTY::Fzy.config.output.stream
+        )
       end
 
       private

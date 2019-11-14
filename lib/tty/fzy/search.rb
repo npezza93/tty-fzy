@@ -3,10 +3,11 @@
 module TTY
   class Fzy
     class Search
-      include Printable
+      include Interfaceable
       extend Forwardable
 
-      attr_accessor :position, :query
+      attr_accessor :query
+      attr_reader :position
 
       def_delegator :query, :empty?
 
@@ -20,21 +21,29 @@ module TTY
       end
 
       def render
-        print("#{::TTY::Fzy.config.prompt}#{pretty_query}")
-        print(TTY::Cursor.backward(position)) if position.positive?
+        clear_line
+        print("#{prompt}#{pretty_query}")
+        column(prompt.size + position + 1)
       end
 
       def push(character)
-        query.insert(query.size - position, character)
+        query.insert(position, character)
+        self.position += 1
       end
 
       def delete
-        query.delete_at(query.size - position)
-        forward
+        return if position == query.size
+
+        query.delete_at(position)
+
+        render
       end
 
       def backspace
-        query.delete_at(query.size - 1 - position)
+        return if position.zero?
+
+        query.delete_at(position - 1)
+        self.position -= 1
       end
 
       def backspace_word
@@ -42,26 +51,41 @@ module TTY
         backspace until query.empty? || !whitespace_character?
       end
 
-      def forward
-        self.position -= 1 unless position.zero?
+      def right
+        return if position == query.size
+
+        self.position += 1
       end
 
-      def back
-        self.position += 1 unless position == query.size
+      def left
+        return if position.zero?
+
+        self.position -= 1
       end
 
       def clear
         self.query = []
+        self.position = 0
       end
 
       def autocomplete(option)
         self.query = option.text.split("")
+        self.position = query.size
       end
 
       private
 
       def whitespace_character?
-        query[query.size - 1 - position].match?(/\s/)
+        query[position - 1].match?(/\s/)
+      end
+
+      def prompt
+        ::TTY::Fzy.config.prompt
+      end
+
+      def position=(new_position)
+        @position = new_position
+        render
       end
     end
   end

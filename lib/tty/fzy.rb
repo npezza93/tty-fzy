@@ -6,6 +6,7 @@ require "tty-cursor"
 require "pastel"
 
 require_relative "fzy/printable"
+require_relative "fzy/interfaceable"
 require_relative "fzy/configuration"
 require_relative "fzy/search"
 require_relative "fzy/choices"
@@ -62,11 +63,11 @@ module TTY
     end
 
     def keyright(*)
-      search.forward
+      search.right
     end
 
     def keyleft(*)
-      search.back
+      search.left
     end
 
     def keyup(*)
