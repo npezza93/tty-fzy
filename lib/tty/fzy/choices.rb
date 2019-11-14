@@ -5,7 +5,7 @@ require_relative "choice"
 module TTY
   class Fzy
     class Choices
-      include Printable
+      include Interfaceable
       extend Forwardable
 
       attr_accessor :choices, :position
@@ -28,15 +28,47 @@ module TTY
       end
 
       def next
-        change_current do
-          self.position = (position + 1) % filtered_choices.size
+        return if filtered_choices.empty?
+
+        save
+        down(position + 1)
+        clear_line
+        current.deactivate!
+        print current.render(30)
+        self.position += 1
+        if position > filtered_choices.size - 1
+          self.position = 0
+          current.activate!
+          up(filtered_choices.size - 1)
+        else
+          current.activate!
+          down
         end
+        clear_line
+        print current.render(30)
+        restore
       end
 
       def previous
-        change_current do
-          self.position = (position - 1) % filtered_choices.size
+        return if filtered_choices.empty?
+
+        save
+        down(position + 1)
+        clear_line
+        current.deactivate!
+        print current.render(30)
+        self.position -= 1
+        if position.negative?
+          self.position = filtered_choices.size - 1
+          current.activate!
+          down(filtered_choices.size - 1)
+        else
+          current.activate!
+          up
         end
+        clear_line
+        print current.render(30)
+        restore
       end
 
       def reset_position!
@@ -45,13 +77,12 @@ module TTY
         end
       end
 
-      def render
-        puts
-
-        print render_choices
-
-        print TTY::Cursor.up(filtered_choices.size)
-        print TTY::Cursor.column(0)
+      def rerender
+        reset_position!
+        preserve_cursor do
+          wipe_screen
+          print render_choices
+        end
       end
 
       private
@@ -59,11 +90,13 @@ module TTY
       attr_reader :search
 
       def filtered_choices
-        if search.empty?
-          choices
-        else
-          choices.select(&:match?).sort_by { |match| -match.score }
-        end.take(::TTY::Fzy.config.lines)
+        @filtered_choices ||= {}
+        @filtered_choices[search.query] ||=
+          if search.empty?
+            choices
+          else
+            choices.select(&:match?).sort_by { |match| -match.score }
+          end.take(::TTY::Fzy.config.lines)
       end
 
       def render_choices
@@ -75,6 +108,21 @@ module TTY
         choices.map(&:deactivate!)
         yield
         current&.activate!
+      end
+
+      def preserve_cursor
+        save
+
+        yield
+
+        restore
+      end
+
+      def wipe_screen
+        lines = [::TTY::Fzy.config.lines, choices.size].min
+        down
+        clear_lines lines
+        up lines - 1
       end
     end
   end

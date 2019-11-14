@@ -41,7 +41,7 @@ module TTY
       return if event.value.size > 1 || IGNORED_KEYS.include?(event.key.name)
 
       search.push(event.value)
-      choices.reset_position!
+      choices.rerender
     end
 
     def keyenter(*)
@@ -53,13 +53,13 @@ module TTY
 
     def keybackspace(*)
       search.backspace
-      choices.reset_position!
+      choices.rerender
     end
     alias keyctrl_h keybackspace
 
     def keydelete(*)
       search.delete
-      choices.reset_position!
+      choices.rerender
     end
 
     def keyright(*)
@@ -81,25 +81,27 @@ module TTY
 
     def keyctrl_u(*)
       search.clear
-      choices.reset_position!
+      choices.rerender
     end
 
     def keyctrl_w(*)
       search.backspace_word
-      choices.reset_position!
+      choices.rerender
     end
 
     def keytab(*)
       search.autocomplete(choices.current)
-      choices.reset_position!
+      choices.rerender
     end
 
     def call
       print(("\n" * choice_line_count) + cursor.up(choice_line_count))
 
       reader.subscribe(self) do
+        choices.rerender
+        search.render
         loop do
-          render
+          reader.read_keypress
         end
       end
     end
@@ -136,7 +138,7 @@ module TTY
     end
 
     def choice_line_count
-      [::TTY::Fzy.config.lines, choices.size].min
+      @choice_line_count ||= [::TTY::Fzy.config.lines, choices.size].min
     end
   end
 end
