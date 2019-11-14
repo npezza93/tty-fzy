@@ -18,7 +18,7 @@ jobs:
     - name: Test & publish code coverage
       uses: paambaati/codeclimate-action@v2.2.0
       env:
-        CC_TEST_REPORTER_ID: e69352ed5eb922f14876e79f2393bcba2496824f15cb3334f263d4f8780eb0c8
+        CC_TEST_REPORTER_ID: 05b92e17dbbc2f0094a0e9ef7afdade2e7d9f50c30cdd5d2a71b91a1451711ae
         COV: 1
       with:
         coverageCommand: bundle exec rake test
