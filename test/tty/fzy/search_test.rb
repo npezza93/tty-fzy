@@ -5,18 +5,6 @@ require "test_helper"
 module TTY
   class Fzy
     class SearchTest < Minitest::Test
-      class MockOutput
-        def initialize
-          @stream = ""
-        end
-
-        attr_accessor :stream
-
-        def print(text)
-          self.stream += text
-        end
-      end
-
       def test_push
         search.push("a")
 
@@ -129,9 +117,9 @@ module TTY
         choice = Struct.new(:text)
         search.autocomplete(choice.new("a"))
 
+        output.rewind
         assert_equal(
-          "#{TTY::Cursor.clear_line}❯ a#{TTY::Cursor.column(4)}",
-          TTY::Fzy.config.output.stream
+          "#{TTY::Cursor.clear_line}❯ a#{TTY::Cursor.column(4)}", output.read
         )
       end
 
@@ -140,10 +128,14 @@ module TTY
       def search
         @search ||= begin
           TTY::Fzy.configure do |config|
-            config.output = MockOutput.new
+            config.output = StringIO.new
           end
           TTY::Fzy::Search.new
         end
+      end
+
+      def output
+        TTY::Fzy.config.output
       end
     end
   end

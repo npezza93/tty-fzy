@@ -5,22 +5,6 @@ require "test_helper"
 module TTY
   class Fzy
     class ChoicesTest < Minitest::Test
-      class MockOutput
-        def initialize
-          @stream = ""
-        end
-
-        attr_accessor :stream
-
-        def puts(text = nil)
-          self.stream += "#{text}\n"
-        end
-
-        def print(text)
-          self.stream += text
-        end
-      end
-
       class MockSearch
         attr_accessor :query
 
@@ -40,56 +24,58 @@ module TTY
       attr_reader :output
 
       def setup
-        @output = MockOutput.new
+        @output = StringIO.new
 
         TTY::Fzy.configure do |config|
           config.output = @output
         end
       end
 
+      def teardown
+        @output.close
+      end
+
       def test_current
         assert_equal "a", choices.current.text
       end
 
-      def test_size
-        assert_equal 3, choices.size
-      end
-
       def test_next
         choices.next
-        assert_equal 1, choices.position
+        assert_equal 1, choices.selected
         choices.next
-        assert_equal 2, choices.position
+        assert_equal 2, choices.selected
         choices.next
-        assert_equal 0, choices.position
+        assert_equal 0, choices.selected
       end
 
       def test_previous
         choices.previous
-        assert_equal 2, choices.position
+        assert_equal 2, choices.selected
         choices.previous
-        assert_equal 1, choices.position
+        assert_equal 1, choices.selected
         choices.previous
-        assert_equal 0, choices.position
+        assert_equal 0, choices.selected
       end
 
-      def test_render
-        choices.render
+      def test_filter
+        choices.filter
+        output.rewind
 
-        assert_equal "\na\nb\nc\e[3A\e[0G", Pastel.new.strip(output.stream)
+        assert_equal "\na\nb\nc\e[3A\e[0G", Pastel.new.strip(output.read)
       end
 
-      def test_render_with_query
-        choices("a").render
+      def test_filter_with_query
+        choices("a").filter
+        output.rewind
 
-        assert_equal "\na\e[1A\e[0G", Pastel.new.strip(output.stream)
+        assert_equal "\na\e[1A\e[0G", Pastel.new.strip(output.read)
       end
 
       def test_returns
-        choices = Choices.new([{ text: "a", returns: "b" }], MockSearch.new)
+        choices = Choices.new([{ text: "a", returns: "b" }], MockSearch.new, 2)
         assert_equal "b", choices.current.returns
 
-        choices = Choices.new([{ text: "a" }], MockSearch.new)
+        choices = Choices.new([{ text: "a" }], MockSearch.new, 2)
         assert_equal "a", choices.current.returns
       end
 
@@ -98,7 +84,8 @@ module TTY
       def choices(query = nil)
         @choices ||= Choices.new(
           [{ text: "a" }, { text: "b" }, { text: "c" }],
-          MockSearch.new(query)
+          MockSearch.new(query),
+          3
         )
       end
     end

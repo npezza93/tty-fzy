@@ -1,10 +1,12 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -U
 # frozen_string_literal: true
 
 require "bundler/setup"
 require "pry"
 require "tty-fzy"
 
-choices = `rg -l .`.split("\n")
+choices =
+  (!STDIN.tty? && ARGF.read.split("\n")) ||
+  `fd -H -E .git --type file --color=always .`.split("\n")
 
 TTY::Fzy.new(choices: choices).call

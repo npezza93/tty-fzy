@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "choice_character"
+
 module TTY
   class Fzy
     class Choice
@@ -31,8 +33,8 @@ module TTY
       end
 
       def render(text_width)
-        text.split("").map.with_index do |character, index|
-          pastel.decorate(character, *character_decorations(index))
+        characters.map.with_index do |character, index|
+          character.to_s(inverse: active?, highlight: positions.include?(index))
         end.join + render_alt(text_width).to_s
       end
 
@@ -41,17 +43,17 @@ module TTY
       end
 
       def returns
-        @returns || text
+        @returns || raw_text
       end
 
       private
 
-      def character_decorations(index)
-        decorations = []
-        decorations.push(:yellow) if match? && positions.include?(index)
-        decorations.push(:inverse) if active?
-
-        decorations
+      def characters
+        @characters ||= pastel.undecorate(text).flat_map do |decoration|
+          decoration[:text].split("").map do |character|
+            ChoiceCharacter.new(character, decoration)
+          end
+        end
       end
 
       def render_alt(text_width)
@@ -66,8 +68,12 @@ module TTY
         if @matches.key?(search.query)
           @matches[search.query]
         else
-          @matches[search.query] = ::Fzy.match(search.pretty_query, text)
+          @matches[search.query] = ::Fzy.match(search.pretty_query, raw_text)
         end
+      end
+
+      def raw_text
+        @raw_text ||= pastel.strip(text)
       end
 
       def pastel

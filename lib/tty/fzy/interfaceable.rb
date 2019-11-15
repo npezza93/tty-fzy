@@ -40,6 +40,23 @@ module TTY
       def column(col)
         print TTY::Cursor.column(col)
       end
+
+      def preserve_cursor
+        save
+
+        yield
+
+        restore
+      end
+
+      def lines
+        IO.console.winsize[0]
+      end
+
+      def move_screen_up(lines)
+        print "\n" * lines
+        up lines
+      end
     end
   end
 end
