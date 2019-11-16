@@ -27,10 +27,6 @@ module TTY
         end.join + render_alt.to_s
       end
 
-      def width
-        text.size
-      end
-
       def returns
         @returns || raw_text
       end

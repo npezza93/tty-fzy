@@ -21,20 +21,8 @@ module TTY
         print TTY::Cursor.down(number)
       end
 
-      def forward(number = nil)
-        print TTY::Cursor.forward(number)
-      end
-
-      def backward(number = nil)
-        print TTY::Cursor.backward(number)
-      end
-
       def clear_line
         print TTY::Cursor.clear_line
-      end
-
-      def clear_lines(number = nil)
-        print TTY::Cursor.clear_lines(number, :down)
       end
 
       def column(col)

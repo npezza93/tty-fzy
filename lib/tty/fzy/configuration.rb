@@ -21,11 +21,11 @@ module TTY
       end
 
       def input
-        @input ||= IO.new(IO.sysopen(tty_file, "r"))
+        @input ||= IO.new(IO.sysopen(tty, "r"))
       end
 
       def output
-        @output ||= IO.new(IO.sysopen(tty_file, "w"))
+        @output ||= IO.new(IO.sysopen(tty, "w"))
       end
 
       private

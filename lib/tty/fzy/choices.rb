@@ -116,7 +116,7 @@ module TTY
 
       def redraw
         wipe_choices
-        # max_width = filtered_choices.map(&:width).max
+
         displayed_choices.map.with_index do |choice, idx|
           choice.render((idx + starting_position) == selected)
         end.tap(&method(:print))
