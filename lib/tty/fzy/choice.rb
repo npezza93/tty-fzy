@@ -7,7 +7,6 @@ module TTY
     class Choice
       extend Forwardable
 
-      attr_accessor :active
       attr_reader :search, :text, :alt
 
       def_delegators :match, :positions, :score
@@ -18,24 +17,14 @@ module TTY
         extract_content(content)
       end
 
-      alias active? active
-
-      def activate!
-        self.active = true
-      end
-
-      def deactivate!
-        self.active = false
-      end
-
       def match?
         search.empty? || !match.nil?
       end
 
-      def render(text_width)
+      def render(active)
         characters.map.with_index do |character, index|
-          character.to_s(inverse: active?, highlight: positions.include?(index))
-        end.join + render_alt(text_width).to_s
+          character.to_s(inverse: active, highlight: positions.include?(index))
+        end.join + render_alt.to_s
       end
 
       def width
@@ -56,10 +45,10 @@ module TTY
         end
       end
 
-      def render_alt(text_width)
+      def render_alt
         return if alt.nil?
 
-        (" " * (text_width - text.size)) + "  " + pastel.dim("(#{alt})")
+        (" " * 2) + "  " + pastel.dim("(#{alt})")
       end
 
       def match

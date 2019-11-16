@@ -5,6 +5,10 @@ require "test_helper"
 module TTY
   class Fzy
     class SearchTest < Minitest::Test
+      ChoiceMock = Struct.new(:text) do
+        alias returns text
+      end
+
       def test_push
         search.push("a")
 
@@ -67,15 +71,13 @@ module TTY
       end
 
       def test_autocomplete
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("thing"))
+        search.autocomplete(ChoiceMock.new("thing"))
 
         assert_equal %w(t h i n g), search.query
       end
 
       def test_backspace_word
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("ab cd"))
+        search.autocomplete(ChoiceMock.new("ab cd"))
 
         search.backspace_word
 
@@ -89,8 +91,7 @@ module TTY
       end
 
       def test_right
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("ab"))
+        search.autocomplete(ChoiceMock.new("ab"))
 
         search.left
         assert_equal 1, search.position
@@ -106,16 +107,14 @@ module TTY
       end
 
       def test_left
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("ab"))
+        search.autocomplete(ChoiceMock.new("ab"))
 
         search.left
         assert_equal 1, search.position
       end
 
       def test_render
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("a"))
+        search.autocomplete(ChoiceMock.new("a"))
 
         output.rewind
         assert_equal(

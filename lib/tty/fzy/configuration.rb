@@ -3,13 +3,14 @@
 module TTY
   class Fzy
     class Configuration
-      attr_accessor :prompt, :lines, :output
+      attr_accessor :prompt, :lines, :output, :scroll_offset
       attr_reader :tty, :input
 
       def initialize
         self.tty = "/dev/tty"
         @prompt = "❯ "
         @lines  = 10
+        @scroll_offset = 1
       end
 
       def tty=(tty_file)

@@ -61,14 +61,18 @@ module TTY
         choices.filter
         output.rewind
 
-        assert_equal "\na\nb\nc\e[3A\e[0G", Pastel.new.strip(output.read)
+        assert_equal(
+          "\e7\e[E\e[1G\e[J\e[7ma\e[0m\nb\nc\e8", output.read
+        )
       end
 
       def test_filter_with_query
         choices("a").filter
         output.rewind
 
-        assert_equal "\na\e[1A\e[0G", Pastel.new.strip(output.read)
+        assert_equal(
+          "\e7\e[E\e[1G\e[J\e[33;7ma\e[0m\e8", output.read
+        )
       end
 
       def test_returns

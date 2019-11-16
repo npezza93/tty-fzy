@@ -57,6 +57,14 @@ module TTY
         print "\n" * lines
         up lines
       end
+
+      def next_line
+        print TTY::Cursor.next_line
+      end
+
+      def clear_screen_down
+        print TTY::Cursor.clear_screen_down
+      end
     end
   end
 end
