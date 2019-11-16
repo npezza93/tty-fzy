@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "strscan"
+
 require "fzy"
 require "tty-reader"
 require "tty-cursor"

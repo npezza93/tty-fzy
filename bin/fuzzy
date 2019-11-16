@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby -U
 # frozen_string_literal: true
 
+$LOAD_PATH.unshift(__dir__ + "../lib")
+
 require "bundler/setup"
-require "pry"
 require "tty-fzy"
 
 choices =

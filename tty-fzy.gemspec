@@ -17,14 +17,13 @@ Gem::Specification.new do |spec|
   spec.metadata["github_repo"] = "ssh://github.com/npezza93/tty-fzy"
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
-  spec.metadata["changelog_uri"] =
-    "https://github.com/npezza93/tty-fzy/releases"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
       f.match(%r{^(test|spec|features)/})
     end
   end
+  spec.executables   = ["fuzzy"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "fzy"
