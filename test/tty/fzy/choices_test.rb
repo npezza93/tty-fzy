@@ -25,8 +25,6 @@ module TTY
       attr_reader :output
 
       def setup
-        FileUtils.mkdir_p("/dev")
-        FileUtils.touch("/dev/tty")
         @output = StringIO.new
 
         TTY::Fzy.configure do |config|

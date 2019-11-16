@@ -14,8 +14,17 @@ module TTY
       end
 
       def tty=(tty_file)
-        @output = IO.new(IO.sysopen(tty_file, "w"))
-        @input = IO.new(IO.sysopen(tty_file, "r"))
+        @tty = tty_file
+        @output = nil
+        @input = nil
+      end
+
+      def input
+        @input ||= IO.new(IO.sysopen(tty_file, "r"))
+      end
+
+      def output
+        @output ||= IO.new(IO.sysopen(tty_file, "w"))
       end
 
       private
