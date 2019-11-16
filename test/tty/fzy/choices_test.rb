@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require 'fileutils'
 
 module TTY
   class Fzy
     class ChoicesTest < Minitest::Test
+      extend Forwardable
+
       class MockSearch
         attr_accessor :query
 
@@ -21,6 +22,9 @@ module TTY
           query.to_a.join
         end
       end
+
+      def_delegators :"TTY::Cursor", :next_line, :clear_screen_down,
+                     :save, :restore
 
       attr_reader :output
 
@@ -60,20 +64,22 @@ module TTY
 
       def test_filter
         choices.filter
-        output.rewind
 
-        assert_equal(
-          "\e7\e[E\e[1G\e[J\e[7ma\e[0m\nb\nc\e8", output.read
-        )
+        expected = initial_draw_output do
+          choices.choices.map.with_index do |choice, idx|
+            choice.render(idx.zero?)
+          end.join("\n")
+        end
+
+        assert_equal expected, raw_output
       end
 
       def test_filter_with_query
         choices("a").filter
-        output.rewind
 
-        assert_equal(
-          "\e7\e[E\e[1G\e[J\e[33;7ma\e[0m\e8", output.read
-        )
+        expected = initial_draw_output { choices.choices.first.render(true) }
+
+        assert_equal expected, raw_output
       end
 
       def test_returns
@@ -85,6 +91,18 @@ module TTY
       end
 
       private
+
+      def initial_draw_output
+        save + next_line + clear_screen_down + yield + restore
+      end
+
+      def raw_output
+        @raw_output ||=
+          begin
+            output.rewind
+            output.read
+          end
+      end
 
       def choices(query = nil)
         @choices ||= Choices.new(

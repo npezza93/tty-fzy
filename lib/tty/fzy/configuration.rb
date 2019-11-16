@@ -3,8 +3,9 @@
 module TTY
   class Fzy
     class Configuration
-      attr_accessor :prompt, :lines, :output, :scroll_offset
-      attr_reader :tty, :input
+      attr_accessor :prompt, :lines, :scroll_offset
+      attr_reader :tty
+      attr_writer :output
 
       def initialize
         self.tty = "/dev/tty"
