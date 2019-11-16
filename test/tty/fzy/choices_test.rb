@@ -5,21 +5,7 @@ require "test_helper"
 module TTY
   class Fzy
     class ChoicesTest < Minitest::Test
-      class MockOutput
-        def initialize
-          @stream = ""
-        end
-
-        attr_accessor :stream
-
-        def puts(text = nil)
-          self.stream += "#{text}\n"
-        end
-
-        def print(text)
-          self.stream += text
-        end
-      end
+      extend Forwardable
 
       class MockSearch
         attr_accessor :query
@@ -37,68 +23,92 @@ module TTY
         end
       end
 
+      def_delegators :"TTY::Cursor", :next_line, :clear_screen_down,
+                     :save, :restore
+
       attr_reader :output
 
       def setup
-        @output = MockOutput.new
+        @output = StringIO.new
 
         TTY::Fzy.configure do |config|
           config.output = @output
         end
       end
 
+      def teardown
+        @output.close
+      end
+
       def test_current
         assert_equal "a", choices.current.text
       end
 
-      def test_size
-        assert_equal 3, choices.size
-      end
-
       def test_next
         choices.next
-        assert_equal 1, choices.position
+        assert_equal 1, choices.selected
         choices.next
-        assert_equal 2, choices.position
+        assert_equal 2, choices.selected
         choices.next
-        assert_equal 0, choices.position
+        assert_equal 0, choices.selected
       end
 
       def test_previous
         choices.previous
-        assert_equal 2, choices.position
+        assert_equal 2, choices.selected
         choices.previous
-        assert_equal 1, choices.position
+        assert_equal 1, choices.selected
         choices.previous
-        assert_equal 0, choices.position
+        assert_equal 0, choices.selected
       end
 
-      def test_render
-        choices.render
+      def test_filter
+        choices.filter
 
-        assert_equal "\na\nb\nc\e[3A\e[0G", Pastel.new.strip(output.stream)
+        expected = initial_draw_output do
+          choices.choices.map.with_index do |choice, idx|
+            choice.render(idx.zero?)
+          end.join("\n")
+        end
+
+        assert_equal expected, raw_output
       end
 
-      def test_render_with_query
-        choices("a").render
+      def test_filter_with_query
+        choices("a").filter
 
-        assert_equal "\na\e[1A\e[0G", Pastel.new.strip(output.stream)
+        expected = initial_draw_output { choices.choices.first.render(true) }
+
+        assert_equal expected, raw_output
       end
 
       def test_returns
-        choices = Choices.new([{ text: "a", returns: "b" }], MockSearch.new)
+        choices = Choices.new([{ text: "a", returns: "b" }], MockSearch.new, 2)
         assert_equal "b", choices.current.returns
 
-        choices = Choices.new([{ text: "a" }], MockSearch.new)
+        choices = Choices.new([{ text: "a" }], MockSearch.new, 2)
         assert_equal "a", choices.current.returns
       end
 
       private
 
+      def initial_draw_output
+        save + next_line + clear_screen_down + yield + restore
+      end
+
+      def raw_output
+        @raw_output ||=
+          begin
+            output.rewind
+            output.read
+          end
+      end
+
       def choices(query = nil)
         @choices ||= Choices.new(
           [{ text: "a" }, { text: "b" }, { text: "c" }],
-          MockSearch.new(query)
+          MockSearch.new(query),
+          3
         )
       end
     end

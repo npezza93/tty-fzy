@@ -69,7 +69,7 @@ module TTY
       end
 
       def autocomplete(option)
-        self.query = option.text.split("")
+        self.query = option.returns.split("")
         self.position = query.size
       end
 

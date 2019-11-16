@@ -5,16 +5,8 @@ require "test_helper"
 module TTY
   class Fzy
     class SearchTest < Minitest::Test
-      class MockOutput
-        def initialize
-          @stream = ""
-        end
-
-        attr_accessor :stream
-
-        def print(text)
-          self.stream += text
-        end
+      ChoiceMock = Struct.new(:text) do
+        alias returns text
       end
 
       def test_push
@@ -79,15 +71,13 @@ module TTY
       end
 
       def test_autocomplete
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("thing"))
+        search.autocomplete(ChoiceMock.new("thing"))
 
         assert_equal %w(t h i n g), search.query
       end
 
       def test_backspace_word
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("ab cd"))
+        search.autocomplete(ChoiceMock.new("ab cd"))
 
         search.backspace_word
 
@@ -101,8 +91,7 @@ module TTY
       end
 
       def test_right
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("ab"))
+        search.autocomplete(ChoiceMock.new("ab"))
 
         search.left
         assert_equal 1, search.position
@@ -118,20 +107,18 @@ module TTY
       end
 
       def test_left
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("ab"))
+        search.autocomplete(ChoiceMock.new("ab"))
 
         search.left
         assert_equal 1, search.position
       end
 
       def test_render
-        choice = Struct.new(:text)
-        search.autocomplete(choice.new("a"))
+        search.autocomplete(ChoiceMock.new("a"))
 
+        output.rewind
         assert_equal(
-          "#{TTY::Cursor.clear_line}❯ a#{TTY::Cursor.column(4)}",
-          TTY::Fzy.config.output.stream
+          "#{TTY::Cursor.clear_line}❯ a#{TTY::Cursor.column(4)}", output.read
         )
       end
 
@@ -140,10 +127,14 @@ module TTY
       def search
         @search ||= begin
           TTY::Fzy.configure do |config|
-            config.output = MockOutput.new
+            config.output = StringIO.new
           end
           TTY::Fzy::Search.new
         end
+      end
+
+      def output
+        TTY::Fzy.config.output
       end
     end
   end

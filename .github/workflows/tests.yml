@@ -17,6 +17,6 @@ jobs:
     - name: Install dependencies
       run: |
         gem install bundler --no-document
-        bundle install
+        bundle install --without=lint
     - name: Run tests
       run: bundle exec rake test
