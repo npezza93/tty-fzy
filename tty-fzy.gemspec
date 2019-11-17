@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
       f.match(%r{^(test|spec|features)/})
     end
   end
-  spec.executables   = ["fuzzy", "fzy-ctags"]
+  spec.executables   = %w(fuzzy fzy-ctags)
   spec.require_paths = ["lib"]
 
   spec.add_dependency "fzy"

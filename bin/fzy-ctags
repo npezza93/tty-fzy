@@ -20,7 +20,7 @@ choices =
   end.split("\n").map(&method(:parse_tag)).compact.map do |line|
     choice = { text: line[0], returns: line[2] }
 
-    choice.merge!(alt: line[1]) if ARGV[0].nil?
+    choice[:alt] = line[1] if ARGV[0].nil?
     choice
   end
 
