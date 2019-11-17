@@ -43,7 +43,7 @@ FileUtils.chdir APP_ROOT do
     # frozen_string_literal: true
 
     module TTY
-      module Fzy
+      class Fzy
         VERSION = "#{joined_version}"
       end
     end
