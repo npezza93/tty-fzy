@@ -68,7 +68,7 @@ module TTY
 
         expected = initial_draw_output do
           choices.choices.map.with_index do |choice, idx|
-            choice.render(idx.zero?)
+            choice.render(idx.zero?, 40)
           end.join("\n")
         end
 
@@ -78,7 +78,9 @@ module TTY
       def test_filter_with_query
         choices("a").filter
 
-        expected = initial_draw_output { choices.choices.first.render(true) }
+        expected = initial_draw_output do
+          choices.choices.first.render(true, 40)
+        end
 
         assert_equal expected, raw_output
       end

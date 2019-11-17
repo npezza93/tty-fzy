@@ -22,14 +22,22 @@ module TTY
         search.empty? || !match.nil?
       end
 
-      def render(active)
-        characters.take(columns).map.with_index do |character, index|
+      def render(active, longest_choice)
+        if alt.nil?
+          characters
+        else
+          [*characters, *alt_characters(active, longest_choice)]
+        end.map.with_index do |character, index|
           character.to_s(inverse: active, highlight: positions.include?(index))
-        end.join
+        end.take(columns).join
       end
 
       def returns
         @returns || raw_text
+      end
+
+      def width
+        characters.size
       end
 
       private
@@ -42,10 +50,17 @@ module TTY
         end
       end
 
-      def render_alt
-        return if alt.nil?
+      def alt_characters(_active, longest_choice)
+        [
+          *Array.new((longest_choice - width) + 2, dim_character(" ")),
+          dim_character("("),
+          *alt.split("").map(&method(:dim_character)),
+          dim_character(")")
+        ]
+      end
 
-        (" " * 2) + "  " + pastel.dim("(#{alt})")
+      def dim_character(character)
+        ChoiceCharacter.new(character, style: :dim)
       end
 
       def match

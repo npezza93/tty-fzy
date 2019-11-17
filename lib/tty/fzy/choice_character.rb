@@ -3,11 +3,11 @@
 module TTY
   class Fzy
     class ChoiceCharacter
-      def initialize(character, decorations)
+      def initialize(character, **decorations)
         @character  = character
         @foreground = decorations[:foreground]
         @background = decorations[:background]
-        @styles     = decorations[:style]
+        @style      = decorations[:style]
       end
 
       def to_s(inverse: false, highlight: false)

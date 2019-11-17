@@ -67,6 +67,10 @@ module TTY
         !filtered_choices.empty?
       end
 
+      def longest_choice
+        filtered_choices.map(&:width).max
+      end
+
       def scroll_choices?
         (selected + 1 >= max_choices) &&
             selected != (filtered_choices.size - 1)
@@ -118,17 +122,21 @@ module TTY
         wipe_choices
 
         displayed_choices.map.with_index do |choice, idx|
-          choice.render((idx + starting_position) == selected)
+          choice.render((idx + starting_position) == selected, longest_choice)
         end.tap(&method(:print))
+      end
+
+      def one_based_choice_index(choice)
+        displayed_choices.index(choice) + 1
       end
 
       def swap_active(previous_index)
         previous = filtered_choices[previous_index]
-        down(displayed_choices.index(previous) + 1)
-        print(previous.render(false), clear: true)
+        down(one_based_choice_index(previous))
+        printo(previous.render(false, longest_choice))
 
         previous_index > selected ? up : down
-        print(current.render(true), clear: true)
+        printo(current.render(true, longest_choice))
       end
     end
   end
