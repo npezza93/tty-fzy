@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "tty-fzy"
+
+require "pry"
+
+require "benchmark"
+require "securerandom"
+# require 'parallel'
+# require "concurrent"
+
+choices = File.read("haystack").split("\n")
+search = TTY::Fzy::Search.new.tap { |s| s.query = %w(f d) }
+mapped = choices.map { |c| TTY::Fzy::Choice.new(search, c) }
+
+puts(Benchmark.measure do
+
+  results = mapped.select do |choice|
+    search.query.all? do |character|
+      choice.returns.match?(/#{character}/i)
+    end
+  end
+
+  # results = Parallel.flat_map(mapped.each_slice(5000).to_a) do |cs|
+  #   cs.map do |c|
+  #     c.match?
+  #     c
+  #   end
+  # end
+
+  # results = mapped.each_slice(5000).flat_map do |cs|
+  #   Concurrent::Future.execute do
+  #     cs.map do |c|
+  #       c.match?
+  #       c
+  #     end
+  #   end
+  # end.map(&:value).flatten
+
+  puts results.count(&:match?)
+end)
