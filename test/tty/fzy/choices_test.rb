@@ -34,6 +34,7 @@ module TTY
         TTY::Fzy.configure do |config|
           config.output = @output
         end
+        stub_winsize
       end
 
       def teardown
@@ -102,6 +103,12 @@ module TTY
             output.rewind
             output.read
           end
+      end
+
+      def stub_winsize
+        TTY::Fzy.config.output.send :define_singleton_method, :winsize do
+          [40, 40]
+        end
       end
 
       def choices(query = nil)
