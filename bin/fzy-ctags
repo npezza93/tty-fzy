@@ -1,9 +1,10 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -U
 # frozen_string_literal: true
+
+$LOAD_PATH.unshift(__dir__ + "../lib")
 
 require "bundler/setup"
 require "tty-fzy"
-require "pry"
 
 def parse_tag(line)
   return if line.start_with?("!_TAG_")
