@@ -38,11 +38,11 @@ module TTY
       end
 
       def columns
-        IO.console.winsize[1]
+        ::TTY::Fzy.config.output.winsize[1]
       end
 
       def lines
-        IO.console.winsize[0]
+        ::TTY::Fzy.config.output.winsize[0]
       end
 
       def move_screen_up(lines)
