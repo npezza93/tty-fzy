@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "tty-fzy"
+require "pry"
+
+def parse_tag(line)
+  return if line.start_with?("!_TAG_")
+
+  line.split("\t")
+end
+
+choices =
+  if ARGV[0]
+    `ctags --format=1 -f - #{ARGV[0]}`
+  else
+    File.read("tags")
+  end.split("\n").map(&method(:parse_tag)).compact.map do |line|
+    choice = { text: line[0], returns: line[2] }
+
+    choice.merge!(alt: line[1]) if ARGV[0].nil?
+    choice
+  end
+
+TTY::Fzy.new(choices: choices).call
