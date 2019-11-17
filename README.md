@@ -18,12 +18,11 @@ Or install it yourself as:
 
 ## Usage
 
-`TTY::Fzy` can have its `input`, `output`, `prompt`, and `lines` configured by doing the following. The current values listed are the defaults.
+`TTY::Fzy` can have its `tty`, `prompt`, and `lines` configured by doing the following. The current values listed are the defaults.
 
 ```ruby
 TTY::Fzy.configure do |config|
-  config.input = $stdin
-  config.output = $stdout
+  config.tty = "/dev/tty"
   config.promt = '❯ '
   config.lines = 10
 end
