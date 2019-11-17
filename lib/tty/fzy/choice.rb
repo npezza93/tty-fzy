@@ -5,6 +5,7 @@ require_relative "choice_character"
 module TTY
   class Fzy
     class Choice
+      include Interfaceable
       extend Forwardable
 
       attr_reader :search, :text, :alt
@@ -22,9 +23,9 @@ module TTY
       end
 
       def render(active)
-        characters.map.with_index do |character, index|
+        characters.take(columns).map.with_index do |character, index|
           character.to_s(inverse: active, highlight: positions.include?(index))
-        end.join + render_alt.to_s
+        end.join
       end
 
       def returns

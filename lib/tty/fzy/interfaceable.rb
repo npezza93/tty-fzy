@@ -37,6 +37,10 @@ module TTY
         restore
       end
 
+      def columns
+        IO.console.winsize[1]
+      end
+
       def lines
         IO.console.winsize[0]
       end
