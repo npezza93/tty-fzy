@@ -2,6 +2,15 @@
 # frozen_string_literal: true
 
 require "tty-fzy"
+require "optparse"
+
+OptionParser.new do |opts|
+  opts.on("-l LINES", "--lines=LINES") do |lines|
+    TTY::Fzy.configure do |config|
+      config.lines = lines.to_i
+    end
+  end
+end.parse!
 
 choices =
   (!STDIN.tty? && ARGF.read.split("\n")) ||
