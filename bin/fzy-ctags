@@ -20,11 +20,11 @@ end
 
 choices =
   if ARGV[0]
-    `ctags --format=1 -f - #{ARGV[0]}`
+    `ctags -f - #{ARGV[0]}`
   else
     File.read("tags")
   end.split("\n").map(&method(:parse_tag)).compact.map do |line|
-    choice = { text: line[0], returns: line[2] }
+    choice = { text: line[0], returns: line[0..1].push(line[2][1..-4]).join("\t") }
 
     choice[:alt] = line[1] if ARGV[0].nil?
     choice
