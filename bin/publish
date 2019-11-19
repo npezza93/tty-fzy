@@ -59,7 +59,9 @@ FileUtils.chdir APP_ROOT do
   system! "git push"
 
   puts "== Publishing gem =="
-  system! "bundle exec rake release"
+  system! "bundle exec rake build"
+  system! "git tag v#{joined_version}"
+  system "git push --tags"
   built_gem_path = "pkg/tty-fzy-#{joined_version}.gem"
   github_host = "https://rubygems.pkg.github.com/npezza93"
 
